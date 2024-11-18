@@ -17,12 +17,11 @@ export const getFilePath = async (doc) => {
   return `${getHostEnv(CURR_ENV)}/files/${doc.name}`;
 };
 
-export const getUserData = async (JWT, user) => {
+export const getUserData = async (user) => {
   return fetch(`${getHostEnv(CURR_ENV)}/api/user/${user.uid}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${JWT}`,
     },
   })
     .then((response) => {
@@ -31,12 +30,11 @@ export const getUserData = async (JWT, user) => {
     .catch((err) => console.log(err));
 };
 
-export const addUserData = async (JWT, user) => {
+export const addUserData = async (user) => {
   return fetch(`${getHostEnv(CURR_ENV)}/api/user`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${JWT}`,
     },
     body: JSON.stringify({
       reqData: user,
@@ -48,12 +46,11 @@ export const addUserData = async (JWT, user) => {
     .catch((err) => console.log(err));
 };
 
-export const updateUser = async (JWT, newUser) => {
+export const updateUser = async (newUser) => {
   return fetch(`${getHostEnv(CURR_ENV)}/api/user`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${JWT}`,
     },
     body: JSON.stringify({
       reqData: newUser,
@@ -70,7 +67,6 @@ export const getDocuments = async (JWT) => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${JWT}`,
     },
   })
     .then((response) => {
@@ -79,12 +75,10 @@ export const getDocuments = async (JWT) => {
     .catch((err) => console.log(err));
 };
 
-export const saveDocument = async (JWT, formData) => {
+export const saveDocument = async (formData) => {
   return fetch(`${getHostEnv(CURR_ENV)}/api/document`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${JWT}`,
-    },
+    headers: {},
     body: formData,
   })
     .then((response) => {
@@ -93,12 +87,11 @@ export const saveDocument = async (JWT, formData) => {
     .catch((err) => console.log(err.message));
 };
 
-export const updateDocument = async (JWT, doc) => {
+export const updateDocument = async (doc) => {
   return fetch(`${getHostEnv(CURR_ENV)}/api/document`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${JWT}`,
     },
     body: JSON.stringify({
       reqData: doc,
@@ -110,12 +103,11 @@ export const updateDocument = async (JWT, doc) => {
     .catch((err) => console.log(err));
 };
 
-export const removeDocument = async (JWT, doc) => {
+export const removeDocument = async (doc) => {
   return fetch(`${getHostEnv(CURR_ENV)}/api/document/${doc.id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${JWT}`,
     },
   })
     .then((response) => {

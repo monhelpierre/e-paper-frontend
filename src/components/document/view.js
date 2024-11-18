@@ -6,11 +6,12 @@ import {
   IconButton,
   DialogActions,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { getFilePath } from "../../../service/e-paper-api";
 
-export default function DocumentView({ doc, setIsViewing }) {
+export default function DocumentView({ doc, setIsViewing, isAdding = false }) {
+  const [fileUrl, setFileUrl] = useState();
   const handleClose = (event, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
       return;
@@ -19,12 +20,14 @@ export default function DocumentView({ doc, setIsViewing }) {
   };
 
   useEffect(() => {
-    if (!doc.path) {
-      getFilePath(doc).then((response) => {
-        doc.path = response;
-      });
+    if (isAdding) {
+      setFileUrl(doc.fileUrl);
+      return;
     }
-  }, []);
+    getFilePath(doc).then((response) => {
+      setFileUrl(response);
+    });
+  }, [isAdding]);
 
   return (
     <Dialog
@@ -55,7 +58,7 @@ export default function DocumentView({ doc, setIsViewing }) {
         </IconButton>
       </DialogTitle>
       <DialogContent dividers>
-        {doc.path && doc.path.endsWith(".pdf") && (
+        {fileUrl && fileUrl.endsWith(".pdf") && (
           <iframe
             src={doc.fileUrl}
             height="410px"

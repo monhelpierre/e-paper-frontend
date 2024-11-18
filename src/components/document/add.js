@@ -23,7 +23,7 @@ import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 
 export default function DocumentAdd({ setIsAdding }) {
-  const { user, setIsLoading, documents, setDocuments, showSnackbar } =
+  const { setIsLoading, documents, setDocuments, showSnackbar } =
     useAppContext();
   const [files, setFiles] = useState([]);
   const [isViewing, setIsViewing] = useState(false);
@@ -31,21 +31,20 @@ export default function DocumentAdd({ setIsAdding }) {
   function uniqueId() {
     let uniqueId;
     do {
-      const randomId = Math.floor(Math.random() * 10000);
-      uniqueId = randomId.toString().padStart(4, "0");
+      uniqueId = Math.floor(Math.random() * 10000);
     } while (
       documents &&
       Object.values(documents).some((doc) => doc.id === uniqueId)
     );
 
-    return uniqueId;
+    return parseInt(uniqueId);
   }
 
   const [formData, setFormData] = useState({
     id: uniqueId(),
     document_origin: "",
     document_type: "",
-    emittor: user.displayName,
+    emittor: "Nome do usuário",
     file: null,
   });
 
@@ -88,29 +87,19 @@ export default function DocumentAdd({ setIsAdding }) {
     data.append("liquid_value", 2000);
     data.append("file", files[0]);
 
-    user
-      .getIdToken(false)
-      .then((JWT) => {
-        return saveDocument(JWT, data);
-      })
-      .then((response) => {
-        console.log(response);
-        if ("message" in response) {
-          user
-            .getIdToken(false)
-            .then((JWT) => {
-              return getDocuments(JWT);
-            })
-            .then((res) => {
-              setDocuments(res.data);
-              setIsLoading(false);
-              setIsAdding(false);
-              showSnackbar("Documento salvo com sucesso!");
-            });
-        } else {
-          showSnackbar("Error ao salvar o documento!", "error");
-        }
-      });
+    saveDocument(data).then((response) => {
+      console.log(response);
+      if ("message" in response) {
+        getDocuments().then((res) => {
+          setDocuments(res.data);
+          setIsLoading(false);
+          setIsAdding(false);
+          showSnackbar("Documento salvo com sucesso!");
+        });
+      } else {
+        showSnackbar("Error ao salvar o documento!", "error");
+      }
+    });
   };
 
   return (

@@ -24,15 +24,17 @@ import {
 import React, { useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Avatar } from "@mui/material";
-import { useAppContext } from "../context/appContext";
 import DocumentList from "../components/document/list";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
+import { useAppContext } from "@/context/appContext";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const { user, userLogout } = useAppContext();
+  const router = useRouter();
   const [currentmenu, setCurrentMenu] = useState("document");
+  const { showSnackbar } = useAppContext();
   const [navbarIsOpen, setNavbarIsOpen] = useState(true);
 
   const toggleNavbar = () => {
@@ -46,7 +48,10 @@ export default function Home() {
           <MenuIcon />
         </MenuBarContainer>
 
-        <EPaperBox style={{ marginLeft: "80px" }}>
+        <EPaperBox
+          style={{ marginLeft: "80px" }}
+          onClick={() => router.push("/")}
+        >
           <TelegramIcon style={{ color: "green", fontSize: "40px" }} />
           <EPaperText>e-paper</EPaperText>
         </EPaperBox>
@@ -63,21 +68,28 @@ export default function Home() {
         </span>
 
         <NotificationArea>
-          <NotificationsOutlinedIcon sx={{ fontSize: "24px" }} />
+          <NotificationsOutlinedIcon
+            onClick={() => {
+              showSnackbar("Nenhuma noticação...", "info");
+            }}
+            sx={{ fontSize: "24px" }}
+            style={{ cursor: "pointer" }}
+          />
         </NotificationArea>
 
         <UserArea>
-          <Avatar
-            alt="User Profile"
-            src={user ? user.photoURL : "/profile.png"}
-          />
+          <Avatar alt="User Profile" src={"/profile.png"} />
 
           <UserInfo>
-            <UserName>{user.displayName.split(" ")[0]}</UserName>
+            <UserName>Nome do usuario</UserName>
             <OrganizationName>Organização</OrganizationName>
           </UserInfo>
 
-          <ChevronWrapper onClick={userLogout}>
+          <ChevronWrapper
+            onClick={() => {
+              showSnackbar("Coming soon...", "info");
+            }}
+          >
             <IconButton>
               <KeyboardArrowDownOutlinedIcon />
             </IconButton>

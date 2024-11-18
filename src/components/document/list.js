@@ -52,7 +52,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 export default function DocumentList() {
-  const { user, documents, showSnackbar, loadDocuments } = useAppContext();
+  const { documents, showSnackbar, loadDocuments } = useAppContext();
   const [docOrigin, setDocOrigin] = useState("");
   const [docType, setDocType] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -83,26 +83,14 @@ export default function DocumentList() {
 
   const handleRemoveDocument = (doc) => {
     handleMenuClose();
-    user
-      .getIdToken(false)
-      .then((JWT) => {
-        return removeDocument(JWT, doc);
-      })
-      .then((response) => {
-        if (response) {
-          user
-            .getIdToken(false)
-            .then((JWT) => {
-              return removeDocument(JWT, user);
-            })
-            .then((r) => {
-              showSnackbar("Documento removido com sucesso!");
-              loadDocuments();
-            });
-        } else {
-          showSnackbar("Error ao remover o documento!", "error");
-        }
-      });
+    removeDocument(doc).then((response) => {
+      if (response) {
+        showSnackbar("Documento removido com sucesso!");
+        loadDocuments();
+      } else {
+        showSnackbar("Error ao remover o documento!", "error");
+      }
+    });
   };
 
   const handleSort = (column) => {
@@ -144,35 +132,38 @@ export default function DocumentList() {
     setMenuRow(null);
   };
 
-  const formatDate = (firestoreDate) => {
-    const seconds = firestoreDate._seconds;
-    const date = new Date(seconds * 1000);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = new Intl.DateTimeFormat("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(date);
+    return formattedDate.replace("de", "");
   };
 
   useEffect(() => {
     if (rows) {
       let filteredData = rows.length > 0 ? rows : documents;
       if (search) {
-        filteredData = documents.filter(
+        filteredData = filteredData.filter(
           (doc) =>
             search === "" ||
-            doc.name.toLowerCase().includes(search.toLowerCase())
+            doc.name.toLowerCase().includes(search.toLowerCase()) ||
+            doc.emittor.toLowerCase().includes(search.toLowerCase()) ||
+            doc.id.toString().toLowerCase().includes(search.toLowerCase())
         );
       }
 
       if (docOrigin) {
-        filteredData = documents.filter(
-          (doc) => docOrigin === "" || doc.document_origin === docOrigin
+        filteredData = filteredData.filter(
+          (doc) => docOrigin === "todos" || doc.document_origin === docOrigin
         );
       }
 
       if (docType) {
-        filteredData = documents.filter(
-          (doc) => docType === "" || doc.document_type === docType
+        filteredData = filteredData.filter(
+          (doc) => docType === "todos" || doc.document_type === docType
         );
       }
       setRows(filteredData);
@@ -243,6 +234,7 @@ export default function DocumentList() {
                     onChange={(e) => setDocOrigin(e.target.value)}
                     style={{ minWidth: "320px" }}
                   >
+                    <MenuItem value="todos">Todos</MenuItem>
                     <MenuItem value="digitalizado">Digitalizado</MenuItem>
                     <MenuItem value="eletronico">Eletrônico</MenuItem>
                   </Select>
@@ -265,6 +257,7 @@ export default function DocumentList() {
                     onChange={(e) => setDocType(e.target.value)}
                     style={{ minWidth: "320px" }}
                   >
+                    <MenuItem value="todos">Todos</MenuItem>
                     <MenuItem value="nota_fiscal">
                       Nota fiscal de serviço
                     </MenuItem>
@@ -361,9 +354,9 @@ export default function DocumentList() {
                         <TableCell>{row.emittor}</TableCell>
                         <TableCell>{row.attr_value}</TableCell>
                         <TableCell>{row.liquid_value}</TableCell>
-                        <TableCell>{formatDate(row.created_at)}</TableCell>
+                        <TableCell>{formatDate(row.createdAt)}</TableCell>
                         <TableCell>
-                          {formatDate(row.updated_at)}
+                          {formatDate(row.updatedAt)}
                           <IconButton
                             onClick={(event) => handleMenuOpen(event, row)}
                           >
