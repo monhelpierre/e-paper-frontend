@@ -1,7 +1,7 @@
 "use client";
 
 import localFont from "next/font/local";
-import { UserProvider } from "../../context/userContext";
+import { AppProvider } from "../context/appContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <UserProvider>{children}</UserProvider>
+        <AppProvider>{children}</AppProvider>
       </body>
     </html>
   );

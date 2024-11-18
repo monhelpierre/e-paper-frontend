@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import {
   MainContainer,
   TopBar,
@@ -15,26 +14,29 @@ import {
   OrganizationName,
   ChevronWrapper,
   NotificationArea,
+  NavBar,
+  OGText,
+  GridViewMenu,
+  DocumentMenu,
+  TextFieldsMenu,
+  FormatListMenu,
 } from "./styles";
 
-import Navbar from "../../components/home/navbar";
-import MenuIcon from "@mui/icons-material/Menu";
+import React, { useState, useEffect } from "react";
 import { IconButton, Avatar } from "@mui/material";
-import LoginWithGoogle from "../../components/auth/login";
-import { useUser } from "../../context/userContext";
+import MenuIcon from "@mui/icons-material/Menu";
+import { useAppContext } from "../context/appContext";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
-import { getDocuments } from "../../service/a-paper-api";
-
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
+import { getDocuments } from "../../service/e-paper-api";
+import DocumentList from "../components/document/list";
 
 export default function Home() {
-  const { user, setDocuments } = useUser();
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, setDocuments, isLoading, setIsLoading } = useAppContext();
+  const [currentmenu, setCurrentMenu] = useState("document");
   const [navbarIsOpen, setNavbarIsOpen] = useState(true);
-  const [currentmenu, setCurrentMenu] = useState("doclist");
+
   const toggleNavbar = () => {
     setNavbarIsOpen(!navbarIsOpen);
   };
@@ -50,80 +52,78 @@ export default function Home() {
           setDocuments(res.data);
           setIsLoading(false);
         });
-    } else {
-      setIsLoading(false);
     }
   }, [user]);
 
   return (
-    <>
-      {isLoading ? (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            backgroundColor: "#f9f9f9",
+    <MainContainer>
+      <TopBar>
+        <MenuBarContainer onClick={toggleNavbar}>
+          <MenuIcon />
+        </MenuBarContainer>
+
+        <EPaperBox style={{ marginLeft: "80px" }}>
+          <TelegramIcon style={{ color: "green", fontSize: "40px" }} />
+          <EPaperText>e-paper</EPaperText>
+        </EPaperBox>
+        <SolutionIcon />
+
+        <span
+          style={{
+            position: "absolute",
+            marginTop: "27px",
+            marginLeft: "10px",
           }}
         >
-          <CircularProgress
-            sx={{
-              color: "#05C151",
-            }}
+          Soluções
+        </span>
+
+        <NotificationArea>
+          <NotificationsOutlinedIcon sx={{ fontSize: "24px" }} />
+        </NotificationArea>
+
+        <UserArea>
+          <Avatar
+            alt="User Profile"
+            src={user ? user.photoURL : "/profile.png"}
           />
-        </Box>
-      ) : !user ? (
-        <LoginWithGoogle />
-      ) : (
-        <MainContainer>
-          <TopBar>
-            <MenuBarContainer onClick={toggleNavbar}>
-              <MenuIcon />
-            </MenuBarContainer>
-            <EPaperBox style={{ marginLeft: "80px" }}>
-              <TelegramIcon style={{ color: "green", fontSize: "40px" }} />
-              <EPaperText>e-paper</EPaperText>
-            </EPaperBox>
-            <SolutionIcon />
-            <span
-              style={{
-                position: "absolute",
-                marginTop: "27px",
-                marginLeft: "10px",
-              }}
-            >
-              Soluções
-            </span>
 
-            <NotificationArea>
-              <NotificationsOutlinedIcon sx={{ fontSize: "24px" }} />
-            </NotificationArea>
+          <UserInfo>
+            <UserName>{user.displayName.split(" ")[0]}</UserName>
+            <OrganizationName>Organização</OrganizationName>
+          </UserInfo>
 
-            <UserArea>
-              <Avatar
-                alt="User Profile"
-                src={user ? user.photoURL : "/profile.png"}
-              />
+          <ChevronWrapper>
+            <IconButton>
+              <KeyboardArrowDownOutlinedIcon />
+            </IconButton>
+          </ChevronWrapper>
+        </UserArea>
+      </TopBar>
 
-              <UserInfo>
-                <UserName>{user.displayName.split(" ")[0]}</UserName>
-                <OrganizationName>Organização</OrganizationName>
-              </UserInfo>
+      <PageContent>
+        <NavBar style={{ display: navbarIsOpen ? "flex" : "none" }}>
+          <OGText>OG</OGText>
+          <GridViewMenu
+            currentmenu={currentmenu}
+            onClick={() => setCurrentMenu("grid")}
+          ></GridViewMenu>
+          <DocumentMenu
+            currentmenu={currentmenu}
+            onClick={() => setCurrentMenu("document")}
+          ></DocumentMenu>
+          <TextFieldsMenu
+            currentmenu={currentmenu}
+            onClick={() => setCurrentMenu("text")}
+          ></TextFieldsMenu>
+          <FormatListMenu
+            currentmenu={currentmenu}
+            onClick={() => setCurrentMenu("format")}
+          ></FormatListMenu>
+        </NavBar>
 
-              <ChevronWrapper>
-                <IconButton>
-                  <KeyboardArrowDownOutlinedIcon />
-                </IconButton>
-              </ChevronWrapper>
-            </UserArea>
-          </TopBar>
-
-          <PageContent>
-            <Navbar setCurrentMenu={setCurrentMenu} currentmenu={currentmenu} />
-          </PageContent>
-        </MainContainer>
-      )}
-    </>
+        {currentmenu === "document" && <DocumentList />}
+      </PageContent>
+    </MainContainer>
   );
 }

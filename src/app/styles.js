@@ -3,14 +3,12 @@ import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import { TableContainer, TableCell } from "@mui/material";
 
 export const MainContainer = styled.div`
   background-color: #ffffe;
   font-family: "Roboto", sans-serif;
   color: #3a424e;
   overflow: hidden;
-  margin-right: 15px;
 `;
 
 export const PageContent = styled.div`
@@ -20,6 +18,7 @@ export const PageContent = styled.div`
 export const TopBar = styled.div`
   height: 72px;
   margin-right: 15px;
+  border-bottom: 1px solid #2222;
 `;
 
 export const MenuBarContainer = styled.div`
@@ -58,8 +57,9 @@ export const SolutionIcon = styled(GridViewOutlinedIcon)`
 
 export const NavBar = styled.div`
   min-width: 64px;
-  border-top: 1px solid #2222;
+  max-width: 64px;
   display: flex;
+  border-right: 1px solid #2222;
   flex-direction: column;
   align-items: center;
   height: 100vh;
@@ -108,20 +108,6 @@ export const NotificationArea = styled.div`
   align-items: center;
   margin-right: 290px;
   justify-content: center;
-`;
-
-export const SearchAndFilterArea = styled.div`
-  margin-top: -46px;
-  position: absolute;
-  height: 48px;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  margin-right: 15px;
 `;
 
 export const UserArea = styled.div`
@@ -179,13 +165,13 @@ export const GridViewMenu = styled(GridViewOutlinedIcon)`
   }
 `;
 
-export const DescriptionMenu = styled(DescriptionOutlinedIcon)`
+export const DocumentMenu = styled(DescriptionOutlinedIcon)`
   font-size: 20;
   margin-bottom: 40px;
   cursor: pointer;
   background-color: ${(props) =>
-    props.currentmenu === "doclist" ? "#caffd6" : "#fff"};
-  padding: ${(props) => (props.currentmenu === "doclist" ? "5px 5px" : "")};
+    props.currentmenu === "document" ? "#caffd6" : "#fff"};
+  padding: ${(props) => (props.currentmenu === "document" ? "5px 5px" : "")};
 
   &:hover {
     background-color: #caffd6;
@@ -217,25 +203,4 @@ export const FormatListMenu = styled(FormatListBulletedIcon)`
     background-color: #caffd6;
     padding: 5px 5px;
   }
-`;
-
-export const PageFooter = styled.div`
-  margin-top: 95vh;
-  min-width: 90vw;
-  margin-left: -110vw;
-  border: 1px solid #2222;
-  background-color: #1111;
-`;
-
-export const TableContainerStyled = styled(TableContainer)`
-  border: 1px solid #2222;
-  border-radius: 5px;
-  margin-top: 25px;
-  margin-right: 10px;
-`;
-
-export const TableCellStyled = styled(TableCell)`
-  width: auto;
-  height: 5px;
-  overflow-x: auto;
 `;
