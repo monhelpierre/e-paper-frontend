@@ -36,8 +36,8 @@ This project is a Next.js frontend application that communicates with a Node.js 
 1. **Clone the Repository**
 
    ```bash
-   git clone <https://github.com/monhelpierre/e-paper-frontend>
-   cd <e-paper-frontend>
+   git clone https://github.com/monhelpierre/e-paper-frontend
+   cd e-paper-frontend
    ```
 
 2. **Install dependencies**
