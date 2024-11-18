@@ -1,9 +1,3 @@
-import React, { useState, useEffect } from "react";
-import { useAppContext } from "../../context/appContext";
-import SearchIcon from "@mui/icons-material/Search";
-import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-
 import {
   Table,
   TableBody,
@@ -25,12 +19,6 @@ import {
   TableFooter,
   TablePagination,
 } from "@mui/material";
-
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AddIcon from "@mui/icons-material/Add";
-import DocumentAdd from "./add";
-import DocumentView from "./view";
-
 import {
   ListContainer,
   TopContent,
@@ -49,27 +37,35 @@ import {
   TableFooterContent,
   TableRowLabel,
 } from "./styles";
+import DocumentAdd from "./add";
+import DocumentView from "./view";
+import AddIcon from "@mui/icons-material/Add";
+import React, { useState, useEffect } from "react";
+import SearchIcon from "@mui/icons-material/Search";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useAppContext } from "../../context/appContext";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { removeDocument } from "../../../service/e-paper-api";
+import PreviewOutlinedIcon from "@mui/icons-material/PreviewOutlined";
+import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import PreviewOutlinedIcon from "@mui/icons-material/PreviewOutlined";
 
 export default function DocumentList() {
   const { user, documents, showSnackbar, loadDocuments } = useAppContext();
+  const [docOrigin, setDocOrigin] = useState("");
+  const [docType, setDocType] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [isViewing, setIsViewing] = useState(false);
-  const [docOrigin, setDocOrigin] = useState("digitalizado");
-  const [docType, setDocType] = useState("nota_fiscal");
-
-  const [rows, setRows] = useState(documents);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
   const [selected, setSelected] = useState([]);
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuRow, setMenuRow] = useState(null);
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [search, setSearch] = useState("");
+  const [rows, setRows] = useState();
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -78,10 +74,6 @@ export default function DocumentList() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const handleChange = (event) => {
-    setIsAdding(true);
   };
 
   const handleVisualizeDocument = (doc) => {
@@ -161,6 +153,40 @@ export default function DocumentList() {
     return `${day}-${month}-${year}`;
   };
 
+  useEffect(() => {
+    if (rows) {
+      let filteredData = rows.length > 0 ? rows : documents;
+      if (search) {
+        filteredData = documents.filter(
+          (doc) =>
+            search === "" ||
+            doc.name.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
+      if (docOrigin) {
+        filteredData = documents.filter(
+          (doc) => docOrigin === "" || doc.document_origin === docOrigin
+        );
+      }
+
+      if (docType) {
+        filteredData = documents.filter(
+          (doc) => docType === "" || doc.document_type === docType
+        );
+      }
+      setRows(filteredData);
+    }
+  }, [search, docOrigin, docType]);
+
+  useEffect(() => {
+    if (documents) {
+      setRows(
+        documents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+      );
+    }
+  }, [documents, page]);
+
   return (
     <>
       {isAdding && <DocumentAdd setIsAdding={setIsAdding} />}
@@ -183,6 +209,7 @@ export default function DocumentList() {
               placeholder="Buscar documentos"
               variant="outlined"
               fullWidth
+              value={search}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -191,8 +218,9 @@ export default function DocumentList() {
                   </InputAdornment>
                 ),
               }}
+              onChange={(e) => setSearch(e.target.value)}
             />
-            <FilterIconAndText>
+            <FilterIconAndText style={{ cursor: "pointer" }}>
               <FilterAltOutlinedIcon /> Filtrar
             </FilterIconAndText>
           </SearchAndFilterArea>
@@ -212,11 +240,11 @@ export default function DocumentList() {
                   <Select
                     value={docOrigin}
                     labelId="dropdown-label"
-                    onChange={() => setDocOrigin(e.target.value)}
+                    onChange={(e) => setDocOrigin(e.target.value)}
                     style={{ minWidth: "320px" }}
                   >
                     <MenuItem value="digitalizado">Digitalizado</MenuItem>
-                    <MenuItem value="eletronicao">Eletrônico</MenuItem>
+                    <MenuItem value="eletronico">Eletrônico</MenuItem>
                   </Select>
                 </FieldAndLabel>
               </FormControl>
@@ -234,11 +262,14 @@ export default function DocumentList() {
                   <Select
                     value={docType}
                     labelId="dropdown-label"
-                    onChange={() => setDocType(e.target.value)}
+                    onChange={(e) => setDocType(e.target.value)}
                     style={{ minWidth: "320px" }}
                   >
                     <MenuItem value="nota_fiscal">
                       Nota fiscal de serviço
+                    </MenuItem>
+                    <MenuItem value="contrato_prestacao">
+                      Contrato de prestação de serviço
                     </MenuItem>
                   </Select>
                 </FieldAndLabel>
@@ -404,9 +435,9 @@ export default function DocumentList() {
               </Menu>
 
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={rows ? rows.length : 0}
+                rowsPerPageOptions={[5, 10, 25]}
+                count={documents ? documents.length : 0}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

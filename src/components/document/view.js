@@ -1,6 +1,3 @@
-import React, { useEffect } from "react";
-import { useAppContext } from "../../context/appContext";
-import { getFilePath } from "../../../service/e-paper-api";
 import {
   Button,
   Dialog,
@@ -9,10 +6,11 @@ import {
   IconButton,
   DialogActions,
 } from "@mui/material";
+import React, { useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { getFilePath } from "../../../service/e-paper-api";
 
 export default function DocumentView({ doc, setIsViewing }) {
-  const { user } = useAppContext();
   const handleClose = (event, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
       return;

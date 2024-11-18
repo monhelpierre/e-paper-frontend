@@ -1,19 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, Button } from "@mui/material";
-
+import React from "react";
 import { EPaperBox, EPaperText } from "./styles";
-
-import { useAppContext } from "../../context/appContext";
 import GoogleIcon from "@mui/icons-material/Google";
 import TelegramIcon from "@mui/icons-material/Telegram";
+import { useAppContext } from "../../context/appContext";
+import { Dialog, DialogContent, Button } from "@mui/material";
 import { signInWithGoogle } from "../../../lib/firebaseAuth";
-
 import { getUserData, addUserData } from "../../../service/e-paper-api";
 
 export default function LoginWithGoogle() {
-  const { user, setUser, setDocuments, setIsLoading } = useAppContext();
-
-  useEffect(() => {}, [user]);
+  const { setUser } = useAppContext();
 
   const handleClose = () => {
     setOpen(false);

@@ -1,25 +1,21 @@
 "use client";
 
-import { Snackbar, Alert, Button } from "@mui/material";
-
-import React, { useState, useEffect, useContext, createContext } from "react";
-import { logout } from "../../lib/firebaseAuth";
-import { useRouter, usePathname } from "next/navigation";
-import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-
-import { getDocuments } from "../../service/e-paper-api";
-
-import LoginWithGoogle from "../components/auth/login";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../lib/firebase";
+import { logout } from "../../lib/firebaseAuth";
+import { Snackbar, Alert } from "@mui/material";
+import { onAuthStateChanged } from "firebase/auth";
+import LoginWithGoogle from "../components/auth/login";
+import { getDocuments } from "../../service/e-paper-api";
+import CircularProgress from "@mui/material/CircularProgress";
+import React, { useState, useEffect, useContext, createContext } from "react";
 
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
-  const [user, setUser] = useState();
   const [documents, setDocuments] = useState();
   const [isLoading, setIsLoading] = useState();
+  const [user, setUser] = useState();
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -84,6 +80,7 @@ export function AppProvider({ children }) {
         setIsLoading,
         showSnackbar,
         loadDocuments,
+        userLogout,
       }}
     >
       {isLoading ? (

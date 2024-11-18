@@ -21,19 +21,17 @@ import {
   TextFieldsMenu,
   FormatListMenu,
 } from "./styles";
-
-import React, { useState, useEffect } from "react";
-import { IconButton, Avatar } from "@mui/material";
+import React, { useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
+import { IconButton, Avatar } from "@mui/material";
 import { useAppContext } from "../context/appContext";
+import DocumentList from "../components/document/list";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
-import DocumentList from "../components/document/list";
 
 export default function Home() {
-  const { user, setDocuments, isLoading, setIsLoading, loadDocuments } =
-    useAppContext();
+  const { user, userLogout } = useAppContext();
   const [currentmenu, setCurrentMenu] = useState("document");
   const [navbarIsOpen, setNavbarIsOpen] = useState(true);
 
@@ -79,7 +77,7 @@ export default function Home() {
             <OrganizationName>Organização</OrganizationName>
           </UserInfo>
 
-          <ChevronWrapper>
+          <ChevronWrapper onClick={userLogout}>
             <IconButton>
               <KeyboardArrowDownOutlinedIcon />
             </IconButton>

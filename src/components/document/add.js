@@ -11,17 +11,16 @@ import {
   Select,
   LinearProgress,
 } from "@mui/material";
+import DocumentView from "./view";
 import { LabelStyle } from "./styles";
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useAppContext } from "../../context/appContext";
+import TaskOutlinedIcon from "@mui/icons-material/TaskOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import { saveDocument, getDocuments } from "../../../service/e-paper-api";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
-import TaskOutlinedIcon from "@mui/icons-material/TaskOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-
-import DocumentView from "./view";
 
 export default function DocumentAdd({ setIsAdding }) {
   const { user, setIsLoading, documents, setDocuments, showSnackbar } =
@@ -77,7 +76,9 @@ export default function DocumentAdd({ setIsAdding }) {
 
   const handleUpload = () => {
     if (!files) return;
+
     setIsLoading(true);
+
     const data = new FormData();
     data.append("id", formData.id);
     data.append("document_origin", formData.document_origin);
