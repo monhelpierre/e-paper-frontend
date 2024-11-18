@@ -70,5 +70,3 @@ This project is a Next.js frontend application that communicates with a Node.js 
    ```bash
       npm start
    ```
-
-   --
