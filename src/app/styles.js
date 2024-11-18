@@ -62,7 +62,6 @@ export const NavBar = styled.div`
   border-right: 1px solid #2222;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
 `;
 
 export const ListContent = styled.section`

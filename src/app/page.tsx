@@ -29,31 +29,17 @@ import { useAppContext } from "../context/appContext";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
-import { getDocuments } from "../../service/e-paper-api";
 import DocumentList from "../components/document/list";
 
 export default function Home() {
-  const { user, setDocuments, isLoading, setIsLoading } = useAppContext();
+  const { user, setDocuments, isLoading, setIsLoading, loadDocuments } =
+    useAppContext();
   const [currentmenu, setCurrentMenu] = useState("document");
   const [navbarIsOpen, setNavbarIsOpen] = useState(true);
 
   const toggleNavbar = () => {
     setNavbarIsOpen(!navbarIsOpen);
   };
-
-  useEffect(() => {
-    if (user) {
-      user
-        .getIdToken(false)
-        .then((JWT: any) => {
-          return getDocuments(JWT);
-        })
-        .then((res: any) => {
-          setDocuments(res.data);
-          setIsLoading(false);
-        });
-    }
-  }, [user]);
 
   return (
     <MainContainer>

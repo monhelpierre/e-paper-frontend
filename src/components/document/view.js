@@ -1,39 +1,86 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useAppContext } from "../../context/appContext";
-import { signInWithGoogle } from "../../../lib/firebaseAuth";
+import { getFilePath } from "../../../service/e-paper-api";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  DialogActions,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
-import { getUserData, addUserData } from "../../../service/e-paper-api";
-
-export default function DocumentView() {
-  const { user, setDocuments, setIsLoading } = useAppContext();
-
-  useEffect(() => {}, [user]);
-
-  const handleConnectGoogle = () => {
-    signInWithGoogle().then((authUser) => {
-      if (authUser) {
-        authUser
-          .getIdToken(false)
-          .then((JWT) => {
-            return getUserData(JWT, authUser);
-          })
-          .then((response) => {
-            if ("error" in response) {
-              authUser
-                .getIdToken(false)
-                .then((JWT) => {
-                  return addUserData(JWT, authUser);
-                })
-                .then((response) => {
-                  setUser(authUser);
-                });
-            } else {
-              setUser(authUser);
-            }
-          });
-      }
-    });
+export default function DocumentView({ doc, setIsViewing }) {
+  const { user } = useAppContext();
+  const handleClose = (event, reason) => {
+    if (reason === "backdropClick" || reason === "escapeKeyDown") {
+      return;
+    }
+    setIsViewing(false);
   };
 
-  return <></>;
+  useEffect(() => {
+    if (!doc.path) {
+      getFilePath(doc).then((response) => {
+        doc.path = response;
+      });
+    }
+  }, []);
+
+  return (
+    <Dialog
+      open={true}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      aria-labelledby="file-viewer-title"
+    >
+      <DialogTitle
+        id="file-viewer-title"
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <div style={{ color: "#3A424E", fontWeight: "bold", fontSize: "18px" }}>
+          Pré-visualização do arquivo
+          <div
+            style={{ color: "#6B7280", fontWeight: "normal", fontSize: "14px" }}
+          >
+            {doc.name}
+          </div>
+        </div>
+        <IconButton onClick={handleClose} aria-label="close">
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers>
+        {doc.path && doc.path.endsWith(".pdf") && (
+          <iframe
+            src={doc.fileUrl}
+            height="410px"
+            style={{ border: "none" }}
+            title="File Viewer"
+          />
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={handleClose}
+          color="error"
+          style={{
+            textTransform: "none",
+            border: "1px solid #2222",
+            color: "#fff",
+            backgroundColor: "#05C151",
+            fontWeight: "bold",
+          }}
+        >
+          Fechar
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }

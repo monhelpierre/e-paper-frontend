@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useAppContext } from "../../context/appContext";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
-
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 import {
@@ -28,11 +27,9 @@ import {
 } from "@mui/material";
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-
 import AddIcon from "@mui/icons-material/Add";
-
-import { DocumentAdd } from "./add";
-import { DocumentView } from "./view";
+import DocumentAdd from "./add";
+import DocumentView from "./view";
 
 import {
   ListContainer,
@@ -52,14 +49,15 @@ import {
   TableFooterContent,
   TableRowLabel,
 } from "./styles";
-import { removeDocument, getDocuments } from "../../../service/e-paper-api";
+import { removeDocument } from "../../../service/e-paper-api";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import PreviewOutlinedIcon from "@mui/icons-material/PreviewOutlined";
 
 export default function DocumentList() {
-  const { user, documents, setDocuments } = useAppContext();
+  const { user, documents, showSnackbar, loadDocuments } = useAppContext();
   const [isAdding, setIsAdding] = useState(false);
+  const [isViewing, setIsViewing] = useState(false);
   const [docOrigin, setDocOrigin] = useState("digitalizado");
   const [docType, setDocType] = useState("nota_fiscal");
 
@@ -86,19 +84,13 @@ export default function DocumentList() {
     setIsAdding(true);
   };
 
-  const handleAddNewDocument = (event) => {
-    setValue(event.target.value);
-  };
-
   const handleVisualizeDocument = (doc) => {
+    setIsViewing(doc);
     handleMenuClose();
   };
-
-  useEffect(() => {}, [user]);
 
   const handleRemoveDocument = (doc) => {
     handleMenuClose();
-    return;
     user
       .getIdToken(false)
       .then((JWT) => {
@@ -111,9 +103,12 @@ export default function DocumentList() {
             .then((JWT) => {
               return removeDocument(JWT, user);
             })
-            .then((response) => {
-              setDocuments(response.data);
+            .then((r) => {
+              showSnackbar("Documento removido com sucesso!");
+              loadDocuments();
             });
+        } else {
+          showSnackbar("Error ao remover o documento!", "error");
         }
       });
   };
@@ -167,245 +162,264 @@ export default function DocumentList() {
   };
 
   return (
-    <ListContainer>
-      <TopContent>
-        <PageTitle>
-          Documentos
-          <PageSubTitle>Crie, gerencie e visualize os documentos</PageSubTitle>
-          <LineUnder />
-        </PageTitle>
-        <SearchAndFilterArea>
-          <TextField
-            placeholder="Buscar documentos"
-            variant="outlined"
-            fullWidth
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {" "}
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <FilterIconAndText>
-            <FilterAltOutlinedIcon /> Filtrar
-          </FilterIconAndText>
-        </SearchAndFilterArea>
+    <>
+      {isAdding && <DocumentAdd setIsAdding={setIsAdding} />}
 
-        <ElementOverTable>
-          <TypeAndOrginField>
-            <FormControl variant="outlined">
-              <FieldAndLabel>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <LabelStyle>Origem do documento</LabelStyle>
-                  <Tooltip title="Origem do documento" arrow>
-                    <IconButton size="small" sx={{ marginLeft: 1 }}>
-                      <HelpOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </div>
-                <Select
-                  value={docOrigin}
-                  labelId="dropdown-label"
-                  onChange={() => setDocOrigin(e.target.value)}
-                  style={{ minWidth: "320px" }}
-                >
-                  <MenuItem value="digitalizado">Digitalizado</MenuItem>
-                  <MenuItem value="eletronicao">Eletrônico</MenuItem>
-                </Select>
-              </FieldAndLabel>
-            </FormControl>
+      {isViewing && (
+        <DocumentView doc={isViewing} setIsViewing={setIsViewing} />
+      )}
 
-            <FormControl variant="outlined">
-              <FieldAndLabel>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <LabelStyle>Tipo documental</LabelStyle>
-                  <Tooltip title="tipo de documento" arrow>
-                    <IconButton size="small" sx={{ marginLeft: 1 }}>
-                      <HelpOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </div>
-                <Select
-                  value={docType}
-                  labelId="dropdown-label"
-                  onChange={() => setDocOrigin(e.target.value)}
-                  style={{ minWidth: "320px" }}
-                >
-                  <MenuItem value="nota_fiscal">
-                    Nota fiscal de serviço
-                  </MenuItem>
-                </Select>
-              </FieldAndLabel>
-            </FormControl>
-          </TypeAndOrginField>
-          <SaveButton onClick={handleAddNewDocument} startIcon={<AddIcon />}>
-            Novo documento
-          </SaveButton>
-        </ElementOverTable>
-
-        <TableArea>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="advanced table">
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      indeterminate={
-                        selected.length > 0 && selected.length < rows.length
-                      }
-                      checked={selected.length === rows.length}
-                      onChange={handleSelectAll}
-                    />
-                  </TableCell>
-                  {[
-                    { id: "name", label: "Nome de documento" },
-                    { id: "emittor", label: "Emitente" },
-                    { id: "attr_value", label: "Volor dos tributos" },
-                    { id: "liquid_value", label: "Valor líquido" },
-                    { id: "created_at", label: "Data de criação" },
-                    { id: "updated_at", label: "Ultima atualização" },
-                  ].map((column) => (
-                    <TableCell
-                      key={column.id}
-                      sortDirection={orderBy === column.id ? order : false}
-                    >
-                      <TableSortLabel
-                        active={orderBy === column.id}
-                        direction={orderBy === column.id ? order : "asc"}
-                        onClick={() => handleSort(column.id)}
-                      >
-                        <TableRowLabel>{column.label}</TableRowLabel>
-                      </TableSortLabel>
-                    </TableCell>
-                  ))}
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selected.includes(row.id)}
-                        onChange={() => handleSelect(row.id)}
-                      />
-                    </TableCell>
-                    <TableCell
-                      style={{ display: "flex", flexDirection: "row" }}
-                    >
-                      <DescriptionOutlinedIcon
-                        style={{
-                          color: "green",
-                          fontSize: "32",
-                          marginTop: "10px",
-                        }}
-                      />
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          color: "#6B7280",
-                          fontSize: "12px",
-                        }}
-                      >
-                        Cód. {row.id}
-                        <div style={{ color: "#191E29", fontSize: "21px" }}>
-                          {row.name}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{row.emittor}</TableCell>
-                    <TableCell>{row.attr_value}</TableCell>
-                    <TableCell>{row.liquid_value}</TableCell>
-                    <TableCell>{formatDate(row.created_at)}</TableCell>
-                    <TableCell>
-                      {formatDate(row.updated_at)}
-                      <IconButton
-                        onClick={(event) => handleMenuOpen(event, row)}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-
-              <TableFooter style={{ backgroundColor: "#2222" }}>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>
-                    <TableFooterTitle>Total</TableFooterTitle>
-                    <TableFooterContent>
-                      {rows.length} documentos
-                    </TableFooterContent>
-                  </TableCell>
-                  <TableCell>
-                    <TableFooterTitle>no de emitentes</TableFooterTitle>
-                    <TableFooterContent>
-                      {rows.length} emitentes
-                    </TableFooterContent>
-                  </TableCell>
-                  <TableCell>
-                    <TableFooterTitle>Total de tributos</TableFooterTitle>
-                    <TableFooterContent>
-                      R$
-                      {rows.reduce(
-                        (sum, row) => sum + parseInt(row.attr_value),
-                        0
-                      )}
-                    </TableFooterContent>
-                  </TableCell>
-                  <TableCell>
-                    <TableFooterTitle>Total valor líquido</TableFooterTitle>
-                    <TableFooterContent>
-                      R$
-                      {rows.reduce(
-                        (sum, row) => sum + parseInt(row.liquid_value),
-                        0
-                      )}
-                    </TableFooterContent>
-                  </TableCell>
-                  <TableCell></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableFooter>
-            </Table>
-
-            <Menu
-              anchorEl={menuAnchor}
-              open={Boolean(menuAnchor)}
-              onClose={handleMenuClose}
-              style={{ display: "flex", flexDirection: "row" }}
-            >
-              <MenuItem onClick={() => handleVisualizeDocument(menuRow)}>
-                <PreviewOutlinedIcon />
-                Visualizar
-              </MenuItem>
-              <MenuItem onClick={() => handleRemoveDocument(menuRow)}>
-                <DeleteOutlineOutlinedIcon /> Excluir documento
-              </MenuItem>
-            </Menu>
-
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
+      <ListContainer>
+        <TopContent>
+          <PageTitle>
+            Documentos
+            <PageSubTitle>
+              Crie, gerencie e visualize os documentos
+            </PageSubTitle>
+            <LineUnder />
+          </PageTitle>
+          <SearchAndFilterArea>
+            <TextField
+              placeholder="Buscar documentos"
+              variant="outlined"
+              fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {" "}
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
               }}
             />
-          </TableContainer>
-        </TableArea>
-      </TopContent>
-    </ListContainer>
+            <FilterIconAndText>
+              <FilterAltOutlinedIcon /> Filtrar
+            </FilterIconAndText>
+          </SearchAndFilterArea>
+
+          <ElementOverTable>
+            <TypeAndOrginField>
+              <FormControl variant="outlined">
+                <FieldAndLabel>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <LabelStyle>Origem do documento</LabelStyle>
+                    <Tooltip title="Origem do documento" arrow>
+                      <IconButton size="small" sx={{ marginLeft: 1 }}>
+                        <HelpOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                  <Select
+                    value={docOrigin}
+                    labelId="dropdown-label"
+                    onChange={() => setDocOrigin(e.target.value)}
+                    style={{ minWidth: "320px" }}
+                  >
+                    <MenuItem value="digitalizado">Digitalizado</MenuItem>
+                    <MenuItem value="eletronicao">Eletrônico</MenuItem>
+                  </Select>
+                </FieldAndLabel>
+              </FormControl>
+
+              <FormControl variant="outlined">
+                <FieldAndLabel>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <LabelStyle>Tipo documental</LabelStyle>
+                    <Tooltip title="tipo de documento" arrow>
+                      <IconButton size="small" sx={{ marginLeft: 1 }}>
+                        <HelpOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                  <Select
+                    value={docType}
+                    labelId="dropdown-label"
+                    onChange={() => setDocType(e.target.value)}
+                    style={{ minWidth: "320px" }}
+                  >
+                    <MenuItem value="nota_fiscal">
+                      Nota fiscal de serviço
+                    </MenuItem>
+                  </Select>
+                </FieldAndLabel>
+              </FormControl>
+            </TypeAndOrginField>
+            <SaveButton
+              onClick={() => setIsAdding(true)}
+              startIcon={<AddIcon />}
+            >
+              Novo documento
+            </SaveButton>
+          </ElementOverTable>
+
+          <TableArea>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} aria-label="advanced table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        indeterminate={
+                          selected.length > 0 && selected.length < rows.length
+                        }
+                        checked={
+                          (rows && selected.length === rows.length) || false
+                        }
+                        onChange={handleSelectAll}
+                      />
+                    </TableCell>
+                    {[
+                      { id: "name", label: "Nome de documento" },
+                      { id: "emittor", label: "Emitente" },
+                      { id: "attr_value", label: "Volor dos tributos" },
+                      { id: "liquid_value", label: "Valor líquido" },
+                      { id: "created_at", label: "Data de criação" },
+                      { id: "updated_at", label: "Ultima atualização" },
+                    ].map((column) => (
+                      <TableCell
+                        key={column.id}
+                        sortDirection={orderBy === column.id ? order : false}
+                      >
+                        <TableSortLabel
+                          active={orderBy === column.id}
+                          direction={orderBy === column.id ? order : "asc"}
+                          onClick={() => handleSort(column.id)}
+                        >
+                          <TableRowLabel>{column.label}</TableRowLabel>
+                        </TableSortLabel>
+                      </TableCell>
+                    ))}
+                    <TableCell />
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {rows &&
+                    rows.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={selected.includes(row.id)}
+                            onChange={() => handleSelect(row.id)}
+                          />
+                        </TableCell>
+                        <TableCell
+                          style={{ display: "flex", flexDirection: "row" }}
+                        >
+                          <DescriptionOutlinedIcon
+                            style={{
+                              color: "green",
+                              fontSize: "32",
+                              marginTop: "10px",
+                            }}
+                          />
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              color: "#6B7280",
+                              fontSize: "12px",
+                            }}
+                          >
+                            Cód. {row.id}
+                            <div style={{ color: "#191E29", fontSize: "21px" }}>
+                              {row.name}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{row.emittor}</TableCell>
+                        <TableCell>{row.attr_value}</TableCell>
+                        <TableCell>{row.liquid_value}</TableCell>
+                        <TableCell>{formatDate(row.created_at)}</TableCell>
+                        <TableCell>
+                          {formatDate(row.updated_at)}
+                          <IconButton
+                            onClick={(event) => handleMenuOpen(event, row)}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+
+                <TableFooter style={{ backgroundColor: "#2222" }}>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell>
+                      <TableFooterTitle>Total</TableFooterTitle>
+                      <TableFooterContent>
+                        {rows ? rows.length : 0} documentos
+                      </TableFooterContent>
+                    </TableCell>
+                    <TableCell>
+                      <TableFooterTitle>no de emitentes</TableFooterTitle>
+                      <TableFooterContent>
+                        {rows ? rows.length : 0} emitentes
+                      </TableFooterContent>
+                    </TableCell>
+                    <TableCell>
+                      <TableFooterTitle>Total de tributos</TableFooterTitle>
+                      <TableFooterContent>
+                        R$
+                        {(rows &&
+                          rows.reduce(
+                            (sum, row) => sum + parseInt(row.attr_value),
+                            0
+                          )) ||
+                          0}
+                      </TableFooterContent>
+                    </TableCell>
+                    <TableCell>
+                      <TableFooterTitle>Total valor líquido</TableFooterTitle>
+                      <TableFooterContent>
+                        R$
+                        {(rows &&
+                          rows.reduce(
+                            (sum, row) => sum + parseInt(row.liquid_value),
+                            0
+                          )) ||
+                          0}
+                      </TableFooterContent>
+                    </TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell />
+                  </TableRow>
+                </TableFooter>
+              </Table>
+
+              <Menu
+                anchorEl={menuAnchor}
+                open={Boolean(menuAnchor)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={() => handleVisualizeDocument(menuRow)}>
+                  <PreviewOutlinedIcon />
+                  Visualizar
+                </MenuItem>
+                <MenuItem onClick={() => handleRemoveDocument(menuRow)}>
+                  <DeleteOutlineOutlinedIcon /> Excluir documento
+                </MenuItem>
+              </Menu>
+
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={rows ? rows.length : 0}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              />
+            </TableContainer>
+          </TableArea>
+        </TopContent>
+      </ListContainer>
+    </>
   );
 }

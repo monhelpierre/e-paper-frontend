@@ -87,8 +87,10 @@ export const saveDocument = async (JWT, formData) => {
     },
     body: formData,
   })
-    .then((response) => response.json())
-    .catch((err) => console.log(err));
+    .then((response) => {
+      return response.json();
+    })
+    .catch((err) => console.log(err.message));
 };
 
 export const updateDocument = async (JWT, doc) => {
