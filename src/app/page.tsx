@@ -1,5 +1,5 @@
 "use client";
-// @ts-ignore
+//@typescript-eslint/ban-ts-comment
 
 import {
   MainContainer,
