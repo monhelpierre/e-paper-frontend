@@ -1,4 +1,5 @@
 "use client";
+// @ts-ignore
 
 import {
   MainContainer,
@@ -33,7 +34,7 @@ import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
-  const [currentmenu, setCurrentMenu] = useState("document");
+  const [currentmenu, setCurrentMenu] = useState<string>("document");
   const { showSnackbar } = useAppContext();
   const [navbarIsOpen, setNavbarIsOpen] = useState(true);
 
