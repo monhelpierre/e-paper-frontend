@@ -243,7 +243,7 @@ export default function DocumentAdd({ setIsAdding }) {
                   {files.map((file, index) => (
                     <span
                       style={{ display: "flex", flexDirection: "row" }}
-                      key={file.name}
+                      key={file.name + "-" + index}
                     >
                       {file.size / (1024 * 1024) > 10 ? (
                         <UploadFileOutlinedIcon
