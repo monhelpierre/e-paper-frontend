@@ -1,16 +1,5 @@
-const CURR_ENV = "dev";
-
 const getHostEnv = () => {
-  switch (CURR_ENV) {
-    case "dev":
-      return process.env.NEXT_PUBLIC_API_URL_DEV;
-    case "fnct":
-      return process.env.NEXT_PUBLIC_API_URL_STAG;
-    case "prod":
-      return process.env.NEXT_PUBLIC_API_URL_PROD;
-    default:
-      return process.env.NEXT_PUBLIC_API_URL_DEV;
-  }
+  return process.env.NEXT_PUBLIC_API_URL;
 };
 
 export const getFilePath = async (doc) => {

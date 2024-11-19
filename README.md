@@ -58,14 +58,13 @@ This project is a Next.js frontend application that communicates with a Node.js 
        NEXT_PUBLIC_API_URL=http://localhost:3001" # Change this URL to your backend URL
    ```
 
-4. **Start the Server**
-   For development
+4. **Start the Server for development**
 
    ```bash
        npm run dev
    ```
 
-   For development
+   **For production**
 
    ```bash
       npm start
